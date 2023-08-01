@@ -1,18 +1,12 @@
 const userRouter = require('express').Router();
 const User = require('../models/User');
-const validator  = require('validator');
-const CryptoJs = require('crypto-js');
 const jwt = require('jsonwebtoken');
 
 
 //Register a new User
 
 userRouter.post('/register', async (req,res)=>{
-    const newUser = new User({
-        username:req.body.username,
-        email:req.body.email,
-        password:CryptoJs.AES.encrypt(req.body.password,'Secret PassPhrase').toString()
-    })
+    const newUser = new User(req.body)
     try{
         const savedUser = await newUser.save();
         res.status(201).send(savedUser)
@@ -59,6 +53,10 @@ userRouter.post('/login',async (req,res)=>{
         })
     }
 })
+
+
+//
+
 
 
 
