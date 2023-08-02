@@ -1,7 +1,7 @@
 const userRouter = require('express').Router();
 const User = require('../models/User');
-const {auth,verifyAdmin}  = require('../middleware/auth');
-const jwt = require("jsonwebtoken");
+const {auth,verifyAdmin,verifyAuthOrAdmin}  = require('../middleware/auth');
+// const jwt = require("jsonwebtoken");
 
 
 
@@ -24,37 +24,19 @@ userRouter.post('/register', async (req,res)=>{
 
 //Log in a User
 userRouter.post("/login", async (req, res) => {
-    try {
-      const user = await User.findByCredentials(
-        req.body.username,
-        req.body.password
-      );
-  
-      const token = await user.generateAuthToken();
-  
-      res.send({ user, token });
-    } catch (e) {
-      res.status(400).send(e);
-    }
-  });
+  try {
+    const user = await User.findByCredentials(
+      req.body.username,
+      req.body.password
+    );
 
+    const token = await user.generateAuthToken();
 
-//Get Me 
-userRouter.get('/me',auth, async (req,res)=>{
-  try{
-    const token  = req.header("Authorization").replace("Bearer ","");
-    const decoded = jwt.verify(token,process.env.JWT_SECRET);
-    const users = await User.findById(decoded._id);
-    res.send(users);
+    res.send({ user, token });
+  } catch (e) {
+    res.status(400).send({"Error":e.message});
   }
-  catch(err){
-    res.status(400).send({
-      "Error":err
-    })
-  }
-})
-
-
+});
 
 //Get All Users
 userRouter.get('/all', verifyAdmin, async (req,res)=>{
@@ -68,6 +50,92 @@ userRouter.get('/all', verifyAdmin, async (req,res)=>{
     })
   }
 })
+
+
+//Get Me 
+userRouter.get('/me',auth, async (req,res)=>{
+  try{
+    // const token  = req.header("Authorization").replace("Bearer ","");
+    // const decoded = jwt.verify(token,process.env.JWT_SECRET);
+    const users = await User.find({});
+    res.send(users);
+  }
+  catch(err){
+    res.status(400).send({
+      "Error":err
+    })
+  }
+})
+
+//Get user by id
+userRouter.get('/find/:id', verifyAuthOrAdmin , async (req,res)=>{
+  try{
+    const user = await User.findById(req.params.id);
+    res.status(200).send({user});
+  }
+  catch(err){
+    res.status(400).send({
+      "Error":err
+    })
+  }
+})
+
+
+
+
+
+//Update a User
+userRouter.patch('/me',auth,async (req,res)=>{
+  const updates = Object.keys(req.body);
+  const allowedUpdates =  ["username", "email", "password", "age"];
+  
+  const isValidOperation = updates.every((update)=>{
+    return allowedUpdates.includes(update);
+  })
+
+  if(!isValidOperation){
+    return res.status(400).send({ error: "Invalid upadate!" });
+  }
+  try {
+    updates.forEach((update) => {
+      req.user[update] = req.body[update];
+    });
+
+    await req.user.save();
+    res.status(200).send(req.user);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+})
+
+
+//Delete me
+
+userRouter.delete('/me', auth, async (req,res)=>{
+  try{
+    await User.findByIdAndDelete(req.user._id);
+    res.status(200).send("User was deleted")
+  }
+  catch(err){
+    res.status(400).send({
+      "Error":err
+    })
+  }
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

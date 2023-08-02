@@ -67,26 +67,29 @@ userSchema.methods.generateAuthToken = async function () {
       throw new Error("Unable to login");
     }
   
-    const isMatch = bcrypt.compare(password, user.password);
+    const isMatch =  await bcrypt.compare(password, user.password);
   
     if (!isMatch) {
       throw new Error("Unable to log in");
     }
+    
+        return user;
+    
   
-    return user;
+    
   };
   
 
-  userSchema.methods.toJSON = function () {
-    const user = this;
-    const userObject = user.toObject();
+//   userSchema.methods.toJSON = function () {
+//     const user = this;
+//     const userObject = user.toObject();
   
-    delete userObject.password;
-    delete userObject.tokens;
-    delete userObject.avatar;
+//     delete userObject.password;
+//     delete userObject.tokens;
+//     delete userObject.avatar;
   
-    return userObject;
-  };
+//     return userObject;
+//   };
 
 
 //Hash the password before saving
