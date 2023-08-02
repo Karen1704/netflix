@@ -1,7 +1,8 @@
 const userRouter = require('express').Router();
 const User = require('../models/User');
 const {auth,verifyAdmin,verifyAuthOrAdmin}  = require('../middleware/auth');
-// const jwt = require("jsonwebtoken");
+const { Error } = require('mongoose');
+const jwt = require("jsonwebtoken");
 
 
 
@@ -34,7 +35,7 @@ userRouter.post("/login", async (req, res) => {
 
     res.send({ user, token });
   } catch (e) {
-    res.status(400).send({"Error":e.message});
+    res.status(400).send({"Error":e.message}); 
   }
 });
 
@@ -55,9 +56,9 @@ userRouter.get('/all', verifyAdmin, async (req,res)=>{
 //Get Me 
 userRouter.get('/me',auth, async (req,res)=>{
   try{
-    // const token  = req.header("Authorization").replace("Bearer ","");
-    // const decoded = jwt.verify(token,process.env.JWT_SECRET);
-    const users = await User.find({});
+    const token  = req.header("Authorization").replace("Bearer ","");
+    const decoded = jwt.verify(token,process.env.JWT_SECRET);
+    const users = await User.findById(decoded._id);
     res.send(users);
   }
   catch(err){
@@ -110,11 +111,27 @@ userRouter.patch('/me',auth,async (req,res)=>{
 
 
 //Delete me
-
 userRouter.delete('/me', auth, async (req,res)=>{
   try{
     await User.findByIdAndDelete(req.user._id);
     res.status(200).send("User was deleted")
+  }
+  catch(err){
+    res.status(400).send({
+      "Error":err
+    })
+  }
+})
+
+
+//Log out a user
+userRouter.post('/logout',auth, async (req,res)=>{
+  try{
+    req.user.tokens = req.user.tokens.filter((token)=>{
+      return token.token !== req.token
+    })
+    await req.user.save();
+    res.status(200).send("User was logged out")
   }
   catch(err){
     res.status(400).send({
