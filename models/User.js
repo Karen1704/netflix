@@ -89,7 +89,7 @@ userSchema.methods.generateAuthToken = async function () {
   };
 
 
-//Hash the plain text password before saving
+//Hash the password before saving
 userSchema.pre("save", async function (next) {
     const user = this;
     if (user.isModified("password")) {

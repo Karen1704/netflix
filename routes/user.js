@@ -1,5 +1,8 @@
 const userRouter = require('express').Router();
 const User = require('../models/User');
+const {auth,verifyAdmin}  = require('../middleware/auth');
+const jwt = require("jsonwebtoken");
+
 
 
 //Register a new User
@@ -36,7 +39,35 @@ userRouter.post("/login", async (req, res) => {
   });
 
 
-//
+//Get Me 
+userRouter.get('/me',auth, async (req,res)=>{
+  try{
+    const token  = req.header("Authorization").replace("Bearer ","");
+    const decoded = jwt.verify(token,process.env.JWT_SECRET);
+    const users = await User.findById(decoded._id);
+    res.send(users);
+  }
+  catch(err){
+    res.status(400).send({
+      "Error":err
+    })
+  }
+})
+
+
+
+//Get All Users
+userRouter.get('/all', verifyAdmin, async (req,res)=>{
+  try{
+    const users = await User.find({});
+    res.send(users);
+  }
+  catch(err){
+    res.status(400).send({
+      "Error":err
+    })
+  }
+})
 
 
 
