@@ -26,6 +26,8 @@ const movieSchema = new mongoose.Schema({
     },
     rating:{
         type:Number,
+        default:0,
+        max:10
     },
     votes:{
         type:Array,
@@ -44,7 +46,8 @@ const movieSchema = new mongoose.Schema({
         type:Array
     },
     duration:{
-        type:String
+        type:String,
+        required:true
     }
 },{timestamps:true})
 

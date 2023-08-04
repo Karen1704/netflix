@@ -68,6 +68,10 @@ userRouter.get('/me',auth, async (req,res)=>{
 userRouter.get('/find/:id', verifyAuthOrAdmin , async (req,res)=>{
   try{
     const user = await User.findById(req.params.id);
+      if (!user) {
+        return res.status(404).send('User not found');
+      }
+    
     res.status(200).send({user});
   }
   catch(err){
@@ -76,6 +80,8 @@ userRouter.get('/find/:id', verifyAuthOrAdmin , async (req,res)=>{
     })
   }
 })
+
+
 
 
 
