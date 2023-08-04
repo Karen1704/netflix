@@ -18,6 +18,7 @@ const movieSchema = new mongoose.Schema({
     },
     genre:{
         type:Array,
+        required:true,
     },
     views:{
         type:Number,
@@ -28,9 +29,27 @@ const movieSchema = new mongoose.Schema({
     },
     votes:{
         type:Array,
-    }    
+    },
+    director:{
+        type:String,
+    },
+    actors:{
+        type:Array,
+    },
+    release_year:{
+        type:Number,
+        required:true,
+    },
+    countries:{
+        type:Array
+    },
+    duration:{
+        type:String
+    }
 },{timestamps:true})
 
 const Movie = mongoose.model("Movie",movieSchema);
 module.exports = Movie;
+
+
 
