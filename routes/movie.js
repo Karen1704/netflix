@@ -90,4 +90,7 @@ movieRouter.delete('/delete/:id',verifyAdminOrMovieManager, async (req,res)=>{
 
 
 
+
+
+
 module.exports = movieRouter;

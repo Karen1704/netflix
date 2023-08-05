@@ -8,7 +8,10 @@ const { Error } = require('mongoose');
 //Register a new User
 
 userRouter.post('/register', async (req,res)=>{
-    const newUser = new User(req.body)
+    const newUser = new User({
+      ...req.body,
+      role:"user"
+    })
     try{
         await newUser.save();
 
