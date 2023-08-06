@@ -19,7 +19,7 @@ userRouter.post('/register', async (req,res)=>{
         res.status(201).send({newUser,token})
     }catch(err){
         res.status(500).send({
-            "Error":err
+            "Error":err.message
         })
     }
 })
@@ -149,6 +149,33 @@ userRouter.post('/logout',auth, async (req,res)=>{
 
 
 
+
+//Make a user admin or movies Manager
+userRouter.patch('/changerole/:id',verifyAdmin ,async (req,res)=>{
+  const updates = Object.keys(req.body);
+  const allowedUpdates =  ["role"];
+
+  const user = await User.findById(req.params.id)
+
+  const isValidOperation = updates.every((update)=>{
+    return allowedUpdates.includes(update);
+  })
+
+  if(!isValidOperation){
+    return res.status(400).send({ error: "Invalid upadate!" });
+  }
+  
+  try {
+    updates.forEach((update) => {
+      user[update] = req.body[update];
+    });
+
+    await user.save();
+    res.status(200).send(user);
+  } catch (err) {
+    res.status(400).send(err);
+  }
+})
 
 
 
