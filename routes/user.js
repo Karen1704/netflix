@@ -44,7 +44,11 @@ userRouter.post("/login", async (req, res) => {
 //Get All Users
 userRouter.get('/all', verifyAdmin, async (req,res)=>{
   try{
-    const users = await User.find({});
+    let query = {};
+    if(req.query.role){
+      query.role = req.query.role
+    }
+    const users = await User.find(query);
     res.send(users);
   }
   catch(err){
