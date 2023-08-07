@@ -33,7 +33,8 @@ const movieSchema = new mongoose.Schema({
         type:Array,
     },
     director:{
-        type:String,
+        type:mongoose.Schema.Types.Object,
+        ref:'Director'
     },
     actors:{
         type:Array,

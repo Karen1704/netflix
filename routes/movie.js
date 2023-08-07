@@ -1,7 +1,6 @@
 const movieRouter = require('express').Router();
 const Movie = require('../models/Movie');
 const { auth, verifyAdmin, verifyAuthOrAdmin, verifyAdminOrMovieManager } = require('../middleware/auth');
-const User = require('../models/User');
 
 
 //Creating movies
@@ -69,7 +68,7 @@ movieRouter.get('/all', async (req, res) => {
                 query.name = { $regex: name, $options: "i" }    // name && (query.name = { $regex: name, $options: "i" })
                 break;
             case !!director:
-                director && (query.director = director)         // director && (query.director = director)
+                query.director._id = director     // director && (query.director = director)
                 break;
             case !!genre:
                 query.genre = { $in: genre }                    // genre && (query.genre = { $in: genre });

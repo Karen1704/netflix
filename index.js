@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const dotenv = require('dotenv')
 const userRouter = require('./routes/user');
 const movieRouter = require('./routes/movie');
+const directorRouter = require('./routes/director');
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use(express.json());
 
 app.use('/api/users',userRouter);
 app.use('/api/movies',movieRouter);
+app.use('/api/directors',directorRouter);
 
 
 
