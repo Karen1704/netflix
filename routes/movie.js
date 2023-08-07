@@ -48,27 +48,39 @@ movieRouter.get('/all', async (req, res) => {
         const country = req.query.country;
         const sortOrder = req.query.sortOrder || 'asc';
         const sortBy = req.query.sortBy;
-        const page = parseInt(req.query.page) || 1; 
+        const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.perPage) || 9;
         const skip = (page - 1) * limit;
 
         let sortCriteria = {};
         let query = {}
 
-        // if (year) {
-        //     query.release_year = year;
-        // }
-        year ? (query.release_year = year) : null;
+        // Object.keys(req.query).foreach((myQuery)=>{
+        //     query[myQuery]=req.query[myQuery];
+        // })
 
-        name ? (query.name = { $regex: name, $options: "i" }) : null;
-  
-        director ? (query.director = director) : null;
 
-        genre ? (query.genre = { $in: genre }) : null;
 
-        actor ? (query.actors = { $in: actor }) : null;
-
-        country ? (query.countries = { $in: country }) : null;
+        switch (true) {
+            case !!year:
+                query.release_year = year                       // year && (query.release_year = year);    if (year) {query.release_year = year;}
+                break;
+            case !!name:
+                query.name = { $regex: name, $options: "i" }    // name && (query.name = { $regex: name, $options: "i" })
+                break;
+            case !!director:
+                director && (query.director = director)         // director && (query.director = director)
+                break;
+            case !!genre:
+                query.genre = { $in: genre }                    // genre && (query.genre = { $in: genre });
+                break
+            case !!actor:
+                query.actors = { $in: actor }                   // actor && (query.actors = { $in: actor })
+                break
+            case !!country:
+                query.countries = { $in: country }              // country && (query.countries = { $in: country })
+                break
+        }
 
         if (sortBy && sortBy === 'rating') {
             sortCriteria.rating = sortOrder === 'desc' ? -1 : 1;
