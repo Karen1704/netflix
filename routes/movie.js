@@ -14,7 +14,7 @@ movieRouter.post('/add', verifyAdminOrMovieManager, async (req, res) => {
     }
     catch (err) {
         res.status(400).send({
-            "Error": err
+            "Error": err.message
         })
     }
 });
@@ -31,7 +31,7 @@ movieRouter.get('/find/:id', async (req, res) => {
     }
     catch (err) {
         res.status(400).send({
-            "Error": err
+            "Error": err.message
         })
     }
 })
@@ -121,7 +121,7 @@ movieRouter.patch('/update/:id', verifyAdminOrMovieManager, async (req, res) => 
         }
         res.status(200).send(updatedMovie)
     } catch (err) {
-        res.status(400).send(err);
+        res.status(400).send(err.message);
     }
 })
 
@@ -137,7 +137,7 @@ movieRouter.delete('/delete/:id', verifyAdminOrMovieManager, async (req, res) =>
     }
     catch (err) {
         res.status(400).send({
-            "Error": err
+            "Error": err.message
         })
     }
 })

@@ -1,27 +1,27 @@
 const userRouter = require('express').Router();
 const User = require('../models/User');
-const {auth,verifyAdmin,verifyAuthOrAdmin}  = require('../middleware/auth');
+const { auth, verifyAdmin, verifyAuthOrAdmin } = require('../middleware/auth');
 const { Error } = require('mongoose');
 
 
 
 //Register a new User
 
-userRouter.post('/register', async (req,res)=>{
-    const newUser = new User({
-      ...req.body,
-      role:"user"
-    })
-    try{
-        await newUser.save();
+userRouter.post('/register', async (req, res) => {
+  const newUser = new User({
+    ...req.body,
+    role: "user"
+  })
+  try {
+    await newUser.save();
 
-        const token = await newUser.generateAuthToken();
-        res.status(201).send({newUser,token})
-    }catch(err){
-        res.status(500).send({
-            "Error":err.message
-        })
-    }
+    const token = await newUser.generateAuthToken();
+    res.status(201).send({ newUser, token })
+  } catch (err) {
+    res.status(500).send({
+      "Error": err.message
+    })
+  }
 })
 
 
@@ -37,53 +37,56 @@ userRouter.post("/login", async (req, res) => {
 
     res.send({ user, token });
   } catch (e) {
-    res.status(400).send({"Error":e.message}); 
+    res.status(400).send({ "Error": e.message });
   }
 });
 
 //Get All Users
-userRouter.get('/all', verifyAdmin, async (req,res)=>{
-  try{
+userRouter.get('/all', verifyAdmin, async (req, res) => {
+  try {
     let query = {};
-    if(req.query.role){
-      query.role = req.query.role
+    const role = req.query.role;
+    switch (true) {
+      case !!role:
+        query.role = req.query.role
+        break
     }
     const users = await User.find(query);
     res.send(users);
   }
-  catch(err){
+  catch (err) {
     res.status(400).send({
-      "Error":err
+      "Error": err.message
     })
   }
 })
 
 
 //Get Me 
-userRouter.get('/me',auth, async (req,res)=>{
-  try{
+userRouter.get('/me', auth, async (req, res) => {
+  try {
     res.status(200).send(req.user);
   }
-  catch(err){
+  catch (err) {
     res.status(400).send({
-      "Error":err
+      "Error": err.message
     })
   }
 })
 
 //Get user by id
-userRouter.get('/find/:id', verifyAuthOrAdmin , async (req,res)=>{
-  try{
+userRouter.get('/find/:id', verifyAuthOrAdmin, async (req, res) => {
+  try {
     const user = await User.findById(req.params.id);
-      if (!user) {
-        return res.status(404).send('User not found');
-      }
-    
-    res.status(200).send({user});
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+
+    res.status(200).send({ user });
   }
-  catch(err){
+  catch (err) {
     res.status(400).send({
-      "Error":err
+      "Error": err.message
     })
   }
 })
@@ -95,15 +98,15 @@ userRouter.get('/find/:id', verifyAuthOrAdmin , async (req,res)=>{
 
 
 //Update a User
-userRouter.patch('/me',auth,async (req,res)=>{
+userRouter.patch('/me', auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates =  ["username", "email", "password", "age"];
-  
-  const isValidOperation = updates.every((update)=>{
+  const allowedUpdates = ["username", "email", "password", "age"];
+
+  const isValidOperation = updates.every((update) => {
     return allowedUpdates.includes(update);
   })
 
-  if(!isValidOperation){
+  if (!isValidOperation) {
     return res.status(400).send({ error: "Invalid upadate!" });
   }
   try {
@@ -114,37 +117,37 @@ userRouter.patch('/me',auth,async (req,res)=>{
     await req.user.save();
     res.status(200).send(req.user);
   } catch (err) {
-    res.status(400).send(err);
+    res.status(400).send(err.message);
   }
 })
 
 
 //Delete me
-userRouter.delete('/me', auth, async (req,res)=>{
-  try{
+userRouter.delete('/me', auth, async (req, res) => {
+  try {
     await User.findByIdAndDelete(req.user._id);
     res.status(200).send("User was deleted")
   }
-  catch(err){
+  catch (err) {
     res.status(400).send({
-      "Error":err
+      "Error": err.message
     })
   }
 })
 
 
 //Log out a user
-userRouter.post('/logout',auth, async (req,res)=>{
-  try{
-    req.user.tokens = req.user.tokens.filter((token)=>{
+userRouter.post('/logout', auth, async (req, res) => {
+  try {
+    req.user.tokens = req.user.tokens.filter((token) => {
       return token.token !== req.token
     })
     await req.user.save();
     res.status(200).send("User was logged out")
   }
-  catch(err){
+  catch (err) {
     res.status(400).send({
-      "Error":err
+      "Error": err.message
     })
   }
 })
@@ -155,20 +158,20 @@ userRouter.post('/logout',auth, async (req,res)=>{
 
 
 //Make a user admin or movies Manager
-userRouter.patch('/changerole/:id',verifyAdmin ,async (req,res)=>{
+userRouter.patch('/changerole/:id', verifyAdmin, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates =  ["role"];
+  const allowedUpdates = ["role"];
 
   const user = await User.findById(req.params.id)
 
-  const isValidOperation = updates.every((update)=>{
+  const isValidOperation = updates.every((update) => {
     return allowedUpdates.includes(update);
   })
 
-  if(!isValidOperation){
+  if (!isValidOperation) {
     return res.status(400).send({ error: "Invalid upadate!" });
   }
-  
+
   try {
     updates.forEach((update) => {
       user[update] = req.body[update];
@@ -177,7 +180,7 @@ userRouter.patch('/changerole/:id',verifyAdmin ,async (req,res)=>{
     await user.save();
     res.status(200).send(user);
   } catch (err) {
-    res.status(400).send(err);
+    res.status(400).send(err.message);
   }
 })
 
