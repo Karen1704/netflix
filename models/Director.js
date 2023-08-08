@@ -5,13 +5,13 @@ const directorSchema = new mongoose.Schema({
         type:String,
         required:true
     }
-})
+},{timestamps:true})
 
 directorSchema.virtual('movies',{
     ref:'Movie',
-    localField:'_id',
-    foreignField:'director.name'
-},{timestamps:true})
+    localField:'name',
+    foreignField:'director'
+})
 
 
 const Director = mongoose.model("Director",directorSchema);

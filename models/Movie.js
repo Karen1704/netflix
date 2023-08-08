@@ -33,12 +33,13 @@ const movieSchema = new mongoose.Schema({
         type:Array,
     },
     director:{
-        type:mongoose.Schema.Types.Object,
+        type:mongoose.Schema.Types.ObjectId,
         ref:'Director'
     },
-    actors:{
-        type:Array,
-    },
+    actors:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Actors"
+    }],
     release_year:{
         type:Number,
         required:true,

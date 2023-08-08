@@ -7,10 +7,18 @@ const actorSchema = new mongoose.Schema({
     }
 },{timestamps:true})
 
-const actorsSchema = new mongoose.Schema({
-    actors:[actorSchema]
-},{timestamps:true})
 
 
-const Actors = mongoose.model('Actors', actorsSchema)
-module.exports = Actors;
+
+
+actorSchema.virtual('movies',{
+    ref:'Movie',
+    localField:'_id',
+    foreignField:'actors'
+})
+
+const Actor = mongoose.model('Actor', actorSchema)
+module.exports = Actor
+
+
+ 
