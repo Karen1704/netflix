@@ -58,7 +58,7 @@ directorRouter.patch('/update/:id', verifyAdminOrMovieManager, async (req, res) 
             $set: req.body
         }, { new: true })
         if (!updatedDirector) {
-            return res.status(404).send("No movie with this id")
+            return res.status(404).send("No director with this id")
         }
         res.status(200).send(updatedDirector)
     } catch (err) {
@@ -71,7 +71,7 @@ directorRouter.delete('/delete/:id', verifyAdminOrMovieManager, async (req, res)
     try {
         const director = await Director.findByIdAndDelete(req.params.id);
         if (!director) {
-            return res.status(404).send("No movie with given id")
+            return res.status(404).send("No director with given id")
         }
         res.status(200).send("Director was deleted")
     }
