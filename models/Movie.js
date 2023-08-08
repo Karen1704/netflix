@@ -16,10 +16,10 @@ const movieSchema = new mongoose.Schema({
         type:String,
         required:true,
     },
-    genre:{
-        type:Array,
-        required:true,
-    },
+    genres:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Genre'
+    }],
     views:{
         type:Number,
         default:0,
