@@ -3,7 +3,7 @@ const genreRouter = require('express').Router();
 const { auth, verifyAdmin, verifyAuthOrAdmin, verifyAdminOrMovieManager } = require('../middleware/auth');
 
 
-genreRouter.post('/add', verifyAdmin, async (req, res) => {
+genreRouter.post('/add', verifyAdminOrMovieManager, async (req, res) => {
     const newGenre = new Genre(req.body);
     try {
         await newGenre.save();

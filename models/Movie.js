@@ -44,9 +44,10 @@ const movieSchema = new mongoose.Schema({
         type:Number,
         required:true,
     },
-    countries:{
-        type:Array
-    },
+    countries:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Country"
+    }],
     duration:{
         type:String,
         required:true

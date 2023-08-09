@@ -6,6 +6,7 @@ const movieRouter = require('./routes/movie');
 const directorRouter = require('./routes/director');
 const actorRouter = require('./routes/actor');
 const genreRouter = require('./routes/genre');
+const countryRouter = require('./routes/country');
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ app.use('/api/movies',movieRouter);
 app.use('/api/directors',directorRouter);
 app.use('/api/actors',actorRouter);
 app.use('/api/genres',genreRouter);
+app.use('/api/countries',countryRouter);
 
 
 

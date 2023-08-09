@@ -22,7 +22,9 @@ movieRouter.post('/add', verifyAdminOrMovieManager, async (req, res) => {
 //Find Movie by Id
 movieRouter.get('/find/:id', async (req, res) => {
     try {
-        const movie = await Movie.findById(req.params.id).populate('genres').populate('director').populate('actors');
+        const movie = await Movie.findById(req.params.id)
+            .populate('genres').populate('director')
+            .populate('actors').populate('countries');
         if (!movie) {
             return res.status(404).send("There is no movie with this id")
         }
@@ -71,7 +73,7 @@ movieRouter.get('/all', async (req, res) => {
                 query.director = director     // director && (query.director = director)
                 break;
             case !!genre:
-                query.genre = { $in: genre }                    // genre && (query.genre = { $in: genre });
+                query.genres = { $in: genre }                    // genre && (query.genre = { $in: genre });
                 break
             case !!actor:
                 query.actors = { $in: actor }                   // actor && (query.actors = { $in: actor })
@@ -91,10 +93,14 @@ movieRouter.get('/all', async (req, res) => {
 
         let movies;
         if (sortCriteria.length === 0) {
-            movies = await Movie.find(query).skip(skip).limit(limit).populate('genres').populate('director').populate('actors')
+            movies = await Movie.find(query).skip(skip).limit(limit)
+                .populate('genres').populate('director')
+                .populate('actors').populate('countries')
         }
         else {
-            movies = await Movie.find(query).sort(sortCriteria).skip(skip).limit(limit).populate('genres').populate('director').populate('actors')
+            movies = await Movie.find(query).sort(sortCriteria).skip(skip).limit(limit)
+                .populate('genres').populate('director')
+                .populate('actors').populate('countries')
         }
 
         if (!movies || movies.length === 0) {
