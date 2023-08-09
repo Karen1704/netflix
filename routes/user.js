@@ -2,6 +2,9 @@ const userRouter = require('express').Router();
 const User = require('../models/User');
 const { auth, verifyAdmin, verifyAuthOrAdmin } = require('../middleware/auth');
 const { Error } = require('mongoose');
+const multer = require("multer");
+const sharp = require('sharp');
+
 
 
 
@@ -65,7 +68,9 @@ userRouter.get('/all', verifyAdmin, async (req, res) => {
 //Get Me 
 userRouter.get('/me', auth, async (req, res) => {
   try {
+    
     res.status(200).send(req.user);
+
   }
   catch (err) {
     res.status(400).send({
@@ -184,6 +189,57 @@ userRouter.patch('/changerole/:id', verifyAdmin, async (req, res) => {
   }
 })
 
+//Upload avatar for user
+
+const upload = multer({
+  limits: {
+    fileSize: 1000000,
+  },
+  fileFilter(req, file, cb) {
+    if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+      return cb(new Error('Please upload an image(jpg or png)'))
+    }
+
+    cb(undefined, true)
+  }
+})
+
+userRouter.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
+  const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).jpeg().toBuffer();
+
+  req.user.avatar = buffer;
+  await req.user.save();
+  res.status(200).send(req.user);
+
+},
+  (error, req, res, next) => {
+    res.status(400).send({ error: error.message });
+  }
+)
+
+
+//Get user avatar
+userRouter.get('/avatar',auth, async (req,res)=>{
+  try {
+    if (!req.user.avatar) {
+      throw new Error();
+    }
+
+    res.set("Content-Type", "image/png");
+    res.send(req.user.avatar);
+  } catch (e) {
+    res.status(404).send();
+  }
+})
+
+
+//Delete user avatar
+
+userRouter.delete("/avatar", auth, async (req, res) => {
+  req.user.avatar = undefined;
+  await req.user.save();
+  res.send();
+});
 
 
 

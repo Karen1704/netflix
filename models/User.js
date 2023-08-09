@@ -25,6 +25,9 @@ const userSchema = new mongoose.Schema(
                 }
             }
         },
+        avatar:{
+          type:Buffer
+        },
         password:{
             type:String,
             required:true,
@@ -80,16 +83,16 @@ userSchema.methods.generateAuthToken = async function () {
   };
   
 
-//   userSchema.methods.toJSON = function () {
-//     const user = this;
-//     const userObject = user.toObject();
+  userSchema.methods.toJSON = function () {
+    const user = this;
+    const userObject = user.toObject();
   
-//     delete userObject.password;
-//     delete userObject.tokens;
-//     delete userObject.avatar;
+    delete userObject.password;
+    delete userObject.tokens;
+    delete userObject.avatar;
   
-//     return userObject;
-//   };
+    return userObject;
+  };
 
 
 //Hash the password before saving
