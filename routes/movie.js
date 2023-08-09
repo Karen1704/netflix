@@ -22,7 +22,7 @@ movieRouter.post('/add', verifyAdminOrMovieManager, async (req, res) => {
 //Find Movie by Id
 movieRouter.get('/find/:id', async (req, res) => {
     try {
-        const movie = await Movie.findById(req.params.id)
+        const movie = await Movie.findById(req.params.id).populate('genres').populate('director').populate('actors');
         if (!movie) {
             return res.status(404).send("There is no movie with this id")
         }
@@ -91,15 +91,17 @@ movieRouter.get('/all', async (req, res) => {
 
         let movies;
         if (sortCriteria.length === 0) {
-            movies = await Movie.find(query).skip(skip).limit(limit)
+            movies = await Movie.find(query).skip(skip).limit(limit).populate('genres').populate('director').populate('actors')
         }
         else {
-            movies = await Movie.find(query).sort(sortCriteria).skip(skip).limit(limit);
+            movies = await Movie.find(query).sort(sortCriteria).skip(skip).limit(limit).populate('genres').populate('director').populate('actors')
         }
 
         if (!movies || movies.length === 0) {
             return res.status(404).send("No movies")
         }
+
+
         res.status(200).send(movies)
     }
     catch (err) {

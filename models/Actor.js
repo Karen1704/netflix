@@ -17,7 +17,7 @@ actorSchema.virtual('movies',{
     foreignField:'actors'
 })
 
-const Actor = mongoose.model('Actor', actorSchema)
+const Actor = mongoose.model('Actor', actorSchema);
 module.exports = Actor
 
 

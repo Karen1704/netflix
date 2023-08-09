@@ -38,7 +38,7 @@ const movieSchema = new mongoose.Schema({
     },
     actors:[{
         type:mongoose.Schema.Types.ObjectId,
-        ref:"Actors"
+        ref:"Actor"
     }],
     release_year:{
         type:Number,

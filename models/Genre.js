@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 
 const genreSchema  = new mongoose.Schema({
-    title:{
+    name:{
         type:String,
         required:true,
     },
-})
+},{timestamps:true})
 
 genreSchema.virtual('movies',{
       ref:'Movie',
