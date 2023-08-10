@@ -228,7 +228,7 @@ userRouter.get('/avatar',auth, async (req,res)=>{
     res.set("Content-Type", "image/png");
     res.send(req.user.avatar);
   } catch (e) {
-    res.status(404).send();
+    res.status(400).send({"Error":err.message});
   }
 })
 
@@ -236,9 +236,17 @@ userRouter.get('/avatar',auth, async (req,res)=>{
 //Delete user avatar
 
 userRouter.delete("/avatar", auth, async (req, res) => {
+  try{
   req.user.avatar = undefined;
   await req.user.save();
-  res.send();
+  res.status(200).send({
+    "message":"User's avatar was removed",
+    "user":req.user
+  });
+  }
+  catch(err){
+    res.status(400).send({"Error":err.message})
+  }
 });
 
 

@@ -1,7 +1,8 @@
 const movieRouter = require('express').Router();
 const Movie = require('../models/Movie');
 const { auth, verifyAdmin, verifyAuthOrAdmin, verifyAdminOrMovieManager } = require('../middleware/auth');
-
+const multer = require('multer');
+const sharp = require('sharp');
 
 //Creating movies
 movieRouter.post('/add', verifyAdminOrMovieManager, async (req, res) => {
@@ -13,7 +14,7 @@ movieRouter.post('/add', verifyAdminOrMovieManager, async (req, res) => {
     }
     catch (err) {
         res.status(400).send({
-            "Error": err.message
+            "Error": err.message``
         })
     }
 });
@@ -148,6 +149,68 @@ movieRouter.delete('/delete/:id', verifyAdminOrMovieManager, async (req, res) =>
         })
     }
 })
+
+
+const uploadImage = multer({
+    limits: {
+        fileSize: 1000000,
+    },
+    fileFilter(req, file, callback) {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+            return callback(new Error('Please upload an image'))
+        }
+        callback(undefined, true)
+    }
+});
+
+movieRouter.post('/image/:id', verifyAdminOrMovieManager, uploadImage.single('image'), async (req, res) => {
+    try {
+        const buffer = await sharp(req.file.buffer).resize({ width: 300, height: 400 }).jpeg().toBuffer();
+        const movie = await Movie.findById(req.params.id);
+
+        movie.image = buffer;
+        await movie.save();
+
+        res.status(200).send(movie)
+
+    }
+    catch (err) {
+        res.status(400).send({ "Error": err.message })
+    }
+})
+
+//Get movie image
+movieRouter.get('/image/:id', async (req, res) => {
+    try {
+        const movie = await Movie.findById(req.params.id);
+        if (!movie.image) {
+            throw new Error();
+        }
+
+        res.set("Content-Type", "image/png");
+        res.status(200).send(movie.image);
+    } catch (err) {
+        res.status(400).send({ "Error": err.message });
+    }
+})
+
+
+//Delete movie image
+
+movieRouter.delete("/image/:id", verifyAdminOrMovieManager, async (req, res) => {
+    try{
+        const movie = await Movie.findById(req.params.id);
+        movie.image = undefined;
+        await movie.save();
+    res.status(200).send({
+      "message":"Movie image was removed",
+      "user":movie
+    });
+    }
+    catch(err){
+      res.status(400).send({"Error":err.message})
+    }
+  });
 
 
 

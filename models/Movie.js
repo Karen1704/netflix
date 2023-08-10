@@ -13,8 +13,7 @@ const movieSchema = new mongoose.Schema({
         type:String,
     },
     image:{
-        type:String,
-        required:true,
+        type:Buffer,
     },
     genres:[{
         type:mongoose.Schema.Types.ObjectId,
