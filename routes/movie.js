@@ -29,7 +29,8 @@ movieRouter.get('/find/:id', async (req, res) => {
         if (!movie) {
             return res.status(404).send("There is no movie with this id")
         }
-        res.status(200).send(movie);
+        const { image, video, ...others } = movie._doc;
+        res.status(200).send(others);
     }
     catch (err) {
         res.status(400).send({
@@ -95,21 +96,25 @@ movieRouter.get('/all', async (req, res) => {
         let movies;
         if (sortCriteria.length === 0) {
             movies = await Movie.find(query).skip(skip).limit(limit)
-                .populate('genres').populate('director')
-                .populate('actors').populate('countries')
+                .populate('genres')
         }
         else {
             movies = await Movie.find(query).sort(sortCriteria).skip(skip).limit(limit)
-                .populate('genres').populate('director')
-                .populate('actors').populate('countries')
+                .populate('genres')
         }
 
         if (!movies || movies.length === 0) {
             return res.status(404).send("No movies")
         }
 
+        const others =[];
+       for(let i=0;i<movies.length;i++){
+            const {image,video, ...other} = movies[i]._doc;
+            others.push(other)
+       }
 
-        res.status(200).send(movies)
+
+        res.status(200).send(others)
     }
     catch (err) {
         res.status(400).send({
@@ -127,7 +132,8 @@ movieRouter.patch('/update/:id', verifyAdminOrMovieManager, async (req, res) => 
         if (!updatedMovie) {
             return res.status(404).send("No movie with this id")
         }
-        res.status(200).send(updatedMovie)
+        const { image, video, ...others } = updatedMovie._doc;
+        res.status(200).send(others)
     } catch (err) {
         res.status(400).send(err.message);
     }
@@ -153,7 +159,7 @@ movieRouter.delete('/delete/:id', verifyAdminOrMovieManager, async (req, res) =>
 
 const uploadImage = multer({
     limits: {
-        fileSize: 1000000,
+        fileSize: 100000,
     },
     fileFilter(req, file, callback) {
         if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
@@ -171,7 +177,8 @@ movieRouter.post('/image/:id', verifyAdminOrMovieManager, uploadImage.single('im
         movie.image = buffer;
         await movie.save();
 
-        res.status(200).send(movie)
+        const{image,video, ...others} = movie._doc;
+        res.status(200).send(others)
 
     }
     catch (err) {
@@ -198,20 +205,89 @@ movieRouter.get('/image/:id', async (req, res) => {
 //Delete movie image
 
 movieRouter.delete("/image/:id", verifyAdminOrMovieManager, async (req, res) => {
-    try{
+    try {
         const movie = await Movie.findById(req.params.id);
         movie.image = undefined;
         await movie.save();
-    res.status(200).send({
-      "message":"Movie image was removed",
-      "user":movie
-    });
+        res.status(200).send({
+            "message": "Movie image was removed",
+            "movie": movie.name
+        });
     }
-    catch(err){
-      res.status(400).send({"Error":err.message})
+    catch (err) {
+        res.status(400).send({ "Error": err.message })
     }
-  });
+});
 
+
+
+//Movie video
+
+const uploadVideo = multer({
+    limits: {
+        fileSize: 100000000,
+    },
+    fileFilter(req, file, callback) {
+        if (!file.originalname.match(/\.(mp4|avi|mkv)$/)) {
+            return callback(new Error('Please upload a video'))
+        }
+        callback(undefined, true)
+    }
+});
+
+
+movieRouter.post('/video/:id', verifyAdminOrMovieManager, uploadVideo.single('video'), async (req, res) => {
+    try {
+        const movie = await Movie.findById(req.params.id);
+
+        movie.video = req.file.buffer;
+        await movie.save();
+
+        res.status(200).send(movie)
+
+    }
+    catch (err) {
+        res.status(400).send({ "Error": err.message })
+        console.log(err)
+    }
+})
+
+
+//Get movie video
+movieRouter.get('/video/:id', async (req, res) => {
+    try {
+        const movie = await Movie.findById(req.params.id);
+        if (!movie.video) {
+            throw new Error;
+        }
+
+        // res.set("Content-Type", "video/");
+        res.status(200).send(movie.video);
+    } catch (err) {
+        res.status(400).send({ "Error": err.message });
+        console.log(err)
+    }
+})
+
+
+movieRouter.delete("/video/:id", verifyAdminOrMovieManager, async (req, res) => {
+    try {
+        const movie = await Movie.findById(req.params.id);
+        movie.video = undefined;
+        await movie.save();
+        res.status(200).send({
+            "message": "Movie image was removed",
+            "movie": {
+                "name": movie.name,
+                "id": movie._id
+            },
+
+        });
+    }
+    catch (err) {
+        res.status(400).send({ "Error": err.message })
+    }
+});
 
 
 

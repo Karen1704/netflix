@@ -12,9 +12,6 @@ const movieSchema = new mongoose.Schema({
     short_description:{
         type:String,
     },
-    image:{
-        type:Buffer,
-    },
     genres:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Genre'
@@ -50,7 +47,14 @@ const movieSchema = new mongoose.Schema({
     duration:{
         type:String,
         required:true
+    },
+    image:{
+        type:Buffer,
+    },
+    video:{
+        type:Buffer
     }
+
 },{timestamps:true})
 
 const Movie = mongoose.model("Movie",movieSchema);
