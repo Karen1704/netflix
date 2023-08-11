@@ -293,4 +293,4 @@ movieRouter.delete("/video/:id", verifyAdminOrMovieManager, async (req, res) => 
 
 
 
-module.exports = movieRouter;
+module.exports = movieRouter; 

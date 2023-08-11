@@ -105,6 +105,13 @@ userSchema.pre("save", async function (next) {
     next();
   });
 
+
+  userSchema.virtual('wishlist',{
+    ref:"Wishlist",
+    localField:"_id",
+    foreignField:"owner"
+  })
+
   const User = mongoose.model("User", userSchema);
 
   module.exports = User;

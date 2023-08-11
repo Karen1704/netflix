@@ -57,6 +57,12 @@ const movieSchema = new mongoose.Schema({
 
 },{timestamps:true})
 
+movieSchema.virtual('wishlist',{
+    ref:'Wishlist',
+    localField:'_id',
+    foreignField:'movies' 
+})
+
 const Movie = mongoose.model("Movie",movieSchema);
 module.exports = Movie;
 

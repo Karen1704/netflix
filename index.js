@@ -7,6 +7,7 @@ const directorRouter = require('./routes/director');
 const actorRouter = require('./routes/actor');
 const genreRouter = require('./routes/genre');
 const countryRouter = require('./routes/country');
+const wishlistRouter = require('./routes/wishlist');
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ app.use('/api/directors',directorRouter);
 app.use('/api/actors',actorRouter);
 app.use('/api/genres',genreRouter);
 app.use('/api/countries',countryRouter);
+app.use('/api/wishlist',wishlistRouter);
 
 
 
