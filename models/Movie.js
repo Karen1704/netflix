@@ -67,6 +67,12 @@ movieSchema.virtual('wishlist',{
     foreignField:'movies' 
 })
 
+userSchema.virtual('reviews',{
+    ref:"Review",
+    localField:"_id",
+    foreignField:"owner"
+  })
+
 
 
 const Movie = mongoose.model("Movie",movieSchema);
