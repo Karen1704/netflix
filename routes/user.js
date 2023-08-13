@@ -48,7 +48,7 @@ userRouter.post("/login", async (req, res) => {
 userRouter.get('/all', verifyAdmin, async (req, res) => {
   try {
     let query = {};
-    const role = req.query.role;
+    const role = req.query.role; 
     switch (true) {
       case !!role:
         query.role = req.query.role

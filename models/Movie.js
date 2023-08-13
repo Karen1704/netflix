@@ -12,6 +12,10 @@ const movieSchema = new mongoose.Schema({
     short_description:{
         type:String,
     },
+    inWishlist:{
+        type:Boolean,
+        default:false
+    },
     genres:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Genre'
@@ -62,6 +66,8 @@ movieSchema.virtual('wishlist',{
     localField:'_id',
     foreignField:'movies' 
 })
+
+
 
 const Movie = mongoose.model("Movie",movieSchema);
 module.exports = Movie;

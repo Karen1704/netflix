@@ -112,6 +112,13 @@ userSchema.pre("save", async function (next) {
     foreignField:"owner"
   })
 
+
+  userSchema.virtual('reviews',{
+    ref:"Review",
+    localField:"_id",
+    foreignField:"owner"
+  })
+
   const User = mongoose.model("User", userSchema);
 
   module.exports = User;
