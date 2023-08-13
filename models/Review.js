@@ -10,7 +10,6 @@ const reviewSchema = new mongoose.Schema({
         required: true,
         ref: "User",
     }
-    
 })
 
 const Review = mongoose.model('Review',reviewSchema);
