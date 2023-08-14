@@ -29,9 +29,6 @@ const movieSchema = new mongoose.Schema({
         default:0,
         max:10
     },
-    votes:{
-        type:Array,
-    },
     director:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Director'
@@ -67,12 +64,14 @@ movieSchema.virtual('wishlist',{
     foreignField:'movies' 
 })
 
-userSchema.virtual('reviews',{
+movieSchema.virtual('reviews',{
     ref:"Review",
     localField:"_id",
     foreignField:"owner"
   })
 
+
+  movieSchema.index({ 'reviews.owner': 1, 'reviews.vote': 1 });
 
 
 const Movie = mongoose.model("Movie",movieSchema);
