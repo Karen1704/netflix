@@ -54,24 +54,27 @@ const movieSchema = new mongoose.Schema({
     },
     video:{
         type:Buffer
-    }
+    },
+    reviews:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Review"
+    }]
 
 },{timestamps:true})
 
-movieSchema.virtual('wishlist',{
-    ref:'Wishlist',
-    localField:'_id',
-    foreignField:'movies' 
-})
-
-movieSchema.virtual('reviews',{
-    ref:"Review",
-    localField:"_id",
-    foreignField:"owner"
-  })
 
 
-  movieSchema.index({ 'reviews.owner': 1, 'reviews.vote': 1 });
+// movieSchema.virtual("reviews", {
+//     ref: "Review",
+//     localField: "_id",
+//     foreignField: "movie",
+//   });
+  
+
+
+
+
+//   movieSchema.index({ 'reviews.owner': 1, 'reviews.vote': 1 });
 
 
 const Movie = mongoose.model("Movie",movieSchema);

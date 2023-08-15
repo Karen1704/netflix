@@ -25,11 +25,17 @@ movieRouter.get('/find/:id', async (req, res) => {
     try {
         const movie = await Movie.findById(req.params.id)
             .populate('genres').populate('director')
-            .populate('actors').populate('countries');
+            .populate('actors').populate('countries')
+            .populate({
+                path:'reviews',
+                populate : "owner"
+            })
         if (!movie) {
             return res.status(404).send("There is no movie with this id")
         }
         const { image, video, ...others } = movie._doc;
+
+        
         res.status(200).send(others);
     }
     catch (err) {
