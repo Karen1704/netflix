@@ -181,6 +181,7 @@ movieRouter.post('/image/:id', verifyAdminOrMovieManager, uploadImage.single('im
         const movie = await Movie.findById(req.params.id);
 
         movie.image = buffer;
+        movie.image_url = `${process.env.URL}/api/movies/image/${movie._id}`
         await movie.save();
 
         const{image,video, ...others} = movie._doc;

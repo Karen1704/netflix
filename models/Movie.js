@@ -52,6 +52,9 @@ const movieSchema = new mongoose.Schema({
     image:{
         type:Buffer,
     },
+    image_url:{
+        type:String
+    },
     video:{
         type:Buffer
     },

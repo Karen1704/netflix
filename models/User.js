@@ -28,6 +28,9 @@ const userSchema = new mongoose.Schema(
         avatar:{
           type:Buffer
         },
+        avatar_url:{
+          type:String
+        },
         password:{
             type:String,
             required:true,

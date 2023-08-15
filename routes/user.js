@@ -208,6 +208,7 @@ userRouter.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
   const buffer = await sharp(req.file.buffer).resize({ width: 250, height: 250 }).jpeg().toBuffer();
 
   req.user.avatar = buffer;
+  req.user.avatar_url = `${process.env.URL}/api/users/avatar`
   await req.user.save();
   res.status(200).send(req.user);
 
