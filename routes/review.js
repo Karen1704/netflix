@@ -29,7 +29,7 @@ reviewRouter.delete('/delete/:id', auth, async (req, res) => {
         if (!review) {
             return res.status(404).send("No reviw with given id")
         }
-        if(req.user._id.toString()  !== review.owner.toString()) {
+        if(req.user._id.toString()  !== review.owner.toString() && req.user.role !== 'admin') {
             return res.status(401).send({"Error":"You are not allowed"});
         }
         const deletedReview = await Review.findByIdAndDelete(req.params.id)
@@ -43,7 +43,6 @@ reviewRouter.delete('/delete/:id', auth, async (req, res) => {
     }
     catch (err) {
         res.status(400).send(err.message)
-        console.log(err)
     }
 })
 

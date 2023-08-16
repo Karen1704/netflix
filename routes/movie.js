@@ -27,15 +27,15 @@ movieRouter.get('/find/:id', async (req, res) => {
             .populate('genres').populate('director')
             .populate('actors').populate('countries')
             .populate({
-                path:'reviews',
-                populate : "owner"
+                path: 'reviews',
+                populate: "owner"
             })
         if (!movie) {
             return res.status(404).send("There is no movie with this id")
         }
         const { image, video, ...others } = movie._doc;
 
-        
+
         res.status(200).send(others);
     }
     catch (err) {
@@ -113,11 +113,11 @@ movieRouter.get('/all', async (req, res) => {
             return res.status(404).send("No movies")
         }
 
-        const others =[];
-       for(let i=0;i<movies.length;i++){
-            const {image,video, ...other} = movies[i]._doc;
+        const others = [];
+        for (let i = 0; i < movies.length; i++) {
+            const { image, video, ...other } = movies[i]._doc;
             others.push(other)
-       }
+        }
 
 
         res.status(200).send(others)
@@ -184,7 +184,7 @@ movieRouter.post('/image/:id', verifyAdminOrMovieManager, uploadImage.single('im
         movie.image_url = `${process.env.URL}/api/movies/image/${movie._id}`
         await movie.save();
 
-        const{image,video, ...others} = movie._doc;
+        const { image, video, ...others } = movie._doc;
         res.status(200).send(others)
 
     }
