@@ -1,7 +1,8 @@
 const mongoose = require('mongoose');
 const reviewRouter = require('express').Router();
 const Review = require('../models/Review');
-const Movie = require('../models/Movie')
+const Movie = require('../models/Movie');
+const User = require('../models/User');
 const { auth, verifyAdmin, verifyAuthOrAdmin, verifyAdminOrMovieManager } = require('../middleware/auth');
 
 
@@ -43,6 +44,25 @@ reviewRouter.delete('/delete/:id', auth, async (req, res) => {
     }
     catch (err) {
         res.status(400).send(err.message)
+    }
+})
+
+reviewRouter.get('/my', auth, async (req,res)=> {
+    try{
+        const reviews = await req.user.populate( {path: "reviews"});
+        if(!reviews){
+            return res.status(404).send({
+                "Message":"You have no reviews"
+            })
+        }
+
+        res.status(200).send(req.user.reviews)
+
+    }
+    catch(err){
+        res.status(400).send({
+            "Error":err.message
+        })
     }
 })
 
