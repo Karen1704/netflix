@@ -4,7 +4,7 @@ const { auth, verifyAdmin, verifyAuthOrAdmin } = require('../middleware/auth');
 const { Error } = require('mongoose');
 const multer = require("multer");
 const sharp = require('sharp');
-const { sendWelcomeEmail, cancelationEmail, passwordResetEmail } = require('../email/account')
+const { sendWelcomeEmail, cancelationEmail, passwordResetEmail, verificationCodeEmail } = require('../email/account')
 const crypto = require('crypto');
 const { errorMonitor } = require('events');
 
@@ -25,6 +25,30 @@ userRouter.post('/register', async (req, res) => {
     const { verificationCode, password, ...user } = newUser._doc;
     res.status(201).send({ user, token })
   } catch (err) {
+    res.status(400).send({
+      "Error": err.message
+    })
+  }
+})
+
+//Send Verification Code
+userRouter.patch('/verifactionCode', async (req, res) => {
+  try {
+    const email = req.body.email;
+    const user = await  User.findOneAndUpdate({ email }, {
+      $set: { verificationCode: crypto.randomBytes(15).toString('hex') }
+    },{new:true})
+    if (!user) {
+      res.status(404).send({
+        "Error": "No user with given email address"
+      })
+    }
+    await user.save();
+    await verificationCodeEmail(email, user.name, user.verificationCode)
+    const { verificationCode, ...others } = user._doc;
+    res.status(200).send(others);
+  }
+  catch (err) {
     res.status(400).send({
       "Error": err.message
     })
@@ -90,14 +114,14 @@ userRouter.patch('/passwordReset', async (req, res) => {
 userRouter.get('/resetCode/:code', async (req, res) => {
   try {
     const passwordResetCode = req.params.code
-    const user  = await User.findOne({passwordResetCode});
-    if(!user){
+    const user = await User.findOne({ passwordResetCode });
+    if (!user) {
       return res.status(401).send({
-        "Error":"Code is expired"
+        "Error": "Code is expired"
       })
     }
     res.status(200).send({
-      "Message":"Code is active"
+      "Message": "Code is active"
     })
   }
   catch (err) {
@@ -110,7 +134,7 @@ userRouter.get('/resetCode/:code', async (req, res) => {
 userRouter.patch('/resetCode/:code', async (req, res) => {
   const updates = Object.keys(req.body);
   // updates.push()
- 
+
 
   const allowedUpdates = ["password"];
 
@@ -124,24 +148,24 @@ userRouter.patch('/resetCode/:code', async (req, res) => {
   updates.push("passwordResetCode");
   try {
     const passwordResetCode = req.params.code
-    
-    const updatedUser = await User.findOne({passwordResetCode})
-    if(!updatedUser){
+
+    const updatedUser = await User.findOne({ passwordResetCode })
+    if (!updatedUser) {
       return res.status(401).send({
-        "Error":"Code is expired"
+        "Error": "Code is expired"
       })
     }
-    
+
     updates.forEach((update) => {
       updatedUser[update] = req.body[update];
     });
 
-    
-  
+
+
     await updatedUser.save();
     res.status(200).send({
-      "Message":"Your password is reset",
-      "user":updatedUser
+      "Message": "Your password is reset",
+      "user": updatedUser
     })
   }
   catch (err) {
@@ -235,7 +259,7 @@ userRouter.get('/find/:id', verifyAuthOrAdmin, async (req, res) => {
 //Update a User
 userRouter.patch('/me', auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["name","username", "email", "password", "age"];
+  const allowedUpdates = ["name", "username", "email", "password", "age"];
 
   const isValidOperation = updates.every((update) => {
     return allowedUpdates.includes(update);
