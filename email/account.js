@@ -34,4 +34,13 @@ const cancelationEmail = (email, name) => {
         })
 }
 
-module.exports = { sendWelcomeEmail, cancelationEmail }
+const passwordResetEmail = (email,name,code)=>{
+    sgMail.send({
+        from: "kar.ghalachyan@gmail.com",
+        to: email,
+        subject:"Reset password",
+        html:`Hi ${name}  your password reset code is ${code}`
+    })
+}
+
+module.exports = { sendWelcomeEmail, cancelationEmail, passwordResetEmail}

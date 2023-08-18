@@ -4,8 +4,9 @@ const { auth, verifyAdmin, verifyAuthOrAdmin } = require('../middleware/auth');
 const { Error } = require('mongoose');
 const multer = require("multer");
 const sharp = require('sharp');
-const { sendWelcomeEmail, cancelationEmail } = require('../email/account')
-const crypto  = require('crypto')
+const { sendWelcomeEmail, cancelationEmail, passwordResetEmail } = require('../email/account')
+const crypto = require('crypto');
+const { errorMonitor } = require('events');
 
 
 //Register a new User
@@ -21,7 +22,7 @@ userRouter.post('/register', async (req, res) => {
     await newUser.save();
     sendWelcomeEmail(newUser.email, newUser.name, newUser.verificationCode);
     const token = await newUser.generateAuthToken();
-    const { verificationCode,password, ...user } = newUser._doc;
+    const { verificationCode, password, ...user } = newUser._doc;
     res.status(201).send({ user, token })
   } catch (err) {
     res.status(400).send({
@@ -31,24 +32,24 @@ userRouter.post('/register', async (req, res) => {
 })
 
 //Verify User
-userRouter.get('/verify/:verificationCode', async (req, res) => {
+userRouter.patch('/verify/:verificationCode', async (req, res) => {
   try {
     const verificationCode = req.params.verificationCode
-    const user = await User.findOneAndUpdate({verificationCode},{
-      $set:{
-        isVerified:true,
-        verificationCode:null
+    const user = await User.findOneAndUpdate({ verificationCode }, {
+      $set: {
+        isVerified: true,
+        verificationCode: null
       }
-    })
-    if(!user){
+    }, { new: true })
+    if (!user) {
       return res.status(404).send({
-        "Error":"Verification code is expired"
+        "Error": "Verification code is expired"
       })
     }
     res.status(200).send({
-      "Message":"You are Verified"
+      "Message": "You are Verified"
     })
-   }
+  }
   catch (err) {
     res.status(400).send({
       "Error": err.message
@@ -56,6 +57,83 @@ userRouter.get('/verify/:verificationCode', async (req, res) => {
   }
 })
 
+
+//Reset user password
+userRouter.patch('/passwordReset', async (req, res) => {
+  try {
+    const email = req.body.email;
+    const user = await User.findOneAndUpdate({ email }, {
+      $set: {
+        passwordResetCode: crypto.randomBytes(15).toString('hex')
+      }
+    }, { new: true });
+    if (!user) {
+      return res.status(404).send({
+        "Error": "No user with given email"
+      })
+    }
+    await user.save();
+    await passwordResetEmail(email, user.name, user.passwordResetCode)
+    res.status(200).send({
+      "Message": "Please, check your email"
+    })
+
+  }
+  catch (err) {
+    res.status(400).send({
+      "Error": err.message
+    })
+  }
+})
+
+//Check if there is user with given password Reset code
+userRouter.get('/resetCode/:code', async (req, res) => {
+  try {
+    const passwordResetCode = req.params.code
+    const user  = await User.findOne({passwordResetCode});
+    if(!user){
+      return res.status(401).send({
+        "Error":"Code is expired"
+      })
+    }
+    res.status(200).send({
+      "Message":"Code is active"
+    })
+  }
+  catch (err) {
+    res.status(400).send({
+      "Error": err.message
+    })
+  }
+})
+
+userRouter.patch('/resetCode/:code', async (req, res) => {
+  const updates = Object.keys(req.body);
+  try {
+    const passwordResetCode = req.params.code
+    
+    const updatedUser = await User.findOne({passwordResetCode})
+    updates.forEach((update) => {
+      updatedUser[update] = req.body[update];
+    });
+    if(!updatedUser){
+      return res.status(401).send({
+        "Error":"Code is expired"
+      })
+    }
+    await updatedUser.save();
+    res.status(200).send({
+      "Message":"Your password is reset",
+      "user":updatedUser
+    })
+  }
+  catch (err) {
+    res.status(400).send({
+      "Error": err.message
+    })
+    console.log(err)
+  }
+})
 
 
 //Log in a User
@@ -65,9 +143,9 @@ userRouter.post("/login", async (req, res) => {
       req.body.username,
       req.body.password
     );
-    if(!user.isVerified){
+    if (!user.isVerified) {
       return res.status(401).send({
-        "Error":"You are not verified, please check your email address"
+        "Error": "You are not verified, please check your email address"
       })
     }
 
@@ -140,7 +218,7 @@ userRouter.get('/find/:id', verifyAuthOrAdmin, async (req, res) => {
 //Update a User
 userRouter.patch('/me', auth, async (req, res) => {
   const updates = Object.keys(req.body);
-  const allowedUpdates = ["username", "email", "password", "age"];
+  const allowedUpdates = ["name","username", "email", "password", "age"];
 
   const isValidOperation = updates.every((update) => {
     return allowedUpdates.includes(update);

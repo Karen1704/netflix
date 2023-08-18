@@ -21,6 +21,9 @@ const userSchema = new mongoose.Schema(
         verificationCode:{
           type:String,
         },
+        passwordResetCode:{
+          type:String
+        },
         email:{
             type:String,
             trim:true,
