@@ -14,7 +14,7 @@ userRouter.post('/register', async (req, res) => {
   const newUser = new User({
     ...req.body,
     role: "user",
-    verificationCode: crypto.randomBytes(30).toString('hex')
+    verificationCode: crypto.randomBytes(10).toString('hex')
   })
 
   try {
@@ -31,7 +31,7 @@ userRouter.post('/register', async (req, res) => {
 })
 
 //Verify User
-userRouter.patch('/verify/:verificationCode', async (req, res) => {
+userRouter.get('/verify/:verificationCode', async (req, res) => {
   try {
     const verificationCode = req.params.verificationCode
     const user = await User.findOneAndUpdate({verificationCode},{

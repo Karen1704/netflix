@@ -10,13 +10,14 @@ const sendWelcomeEmail = (email, name, code) => {
         from: "kar.ghalachyan@gmail.com",
         to: email,
         subject: "Welcome to our Movies App",
-        text: `Welcome ${name}, your verification code is ${code}`
+        html: `<p>Welcome ${name}, click on this  button  to  verify your account</p> <br/>
+         <a href=" http://localhost:3000/api/users/verify/${code}"><button>Verify</button></a>`
     }).then(() => {
         console.log('Email sent')
-      })
-      .catch((error) => {
-        console.error(error)
-      })
+    })
+        .catch((error) => {
+            console.error(error)
+        })
 };
 
 const cancelationEmail = (email, name) => {
@@ -25,7 +26,12 @@ const cancelationEmail = (email, name) => {
         to: email,
         subject: "Sad to see you leaving",
         text: `GoodBye ${name}, hope will see you soon`,
+    }).then(() => {
+        console.log('Email sent')
     })
+        .catch((error) => {
+            console.error(error)
+        })
 }
 
-module.exports = {sendWelcomeEmail,cancelationEmail}
+module.exports = { sendWelcomeEmail, cancelationEmail }
