@@ -14,7 +14,7 @@ userRouter.post('/register', async (req, res) => {
   const newUser = new User({
     ...req.body,
     role: "user",
-    verificationCode: crypto.randomBytes(10).toString('hex')
+    verificationCode: crypto.randomBytes(15).toString('hex')
   })
 
   try {
@@ -40,6 +40,11 @@ userRouter.get('/verify/:verificationCode', async (req, res) => {
         verificationCode:null
       }
     })
+    if(!user){
+      return res.status(404).send({
+        "Error":"Verification code is expired"
+      })
+    }
     res.status(200).send({
       "Message":"You are Verified"
     })
