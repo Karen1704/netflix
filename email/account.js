@@ -5,12 +5,12 @@ const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
-const sendWelcomeEmail = (email, name) => {
+const sendWelcomeEmail = (email, name, code) => {
     sgMail.send({
         from: "kar.ghalachyan@gmail.com",
         to: email,
         subject: "Welcome to our Movies App",
-        text: `Welcome ${name}`
+        text: `Welcome ${name}, your verification code is ${code}`
     }).then(() => {
         console.log('Email sent')
       })

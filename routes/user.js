@@ -4,9 +4,8 @@ const { auth, verifyAdmin, verifyAuthOrAdmin } = require('../middleware/auth');
 const { Error } = require('mongoose');
 const multer = require("multer");
 const sharp = require('sharp');
-const {sendWelcomeEmail,cancelationEmail} = require('../email/account')
-
-
+const { sendWelcomeEmail, cancelationEmail } = require('../email/account')
+const crypto  = require('crypto')
 
 
 //Register a new User
@@ -14,20 +13,44 @@ const {sendWelcomeEmail,cancelationEmail} = require('../email/account')
 userRouter.post('/register', async (req, res) => {
   const newUser = new User({
     ...req.body,
-    role: "user"
+    role: "user",
+    verificationCode: crypto.randomBytes(30).toString('hex')
   })
 
   try {
     await newUser.save();
-    sendWelcomeEmail(newUser.email,newUser.name)
+    sendWelcomeEmail(newUser.email, newUser.name, newUser.verificationCode);
     const token = await newUser.generateAuthToken();
-    res.status(201).send({ newUser, token })
+    const { verificationCode,password, ...user } = newUser._doc;
+    res.status(201).send({ user, token })
   } catch (err) {
     res.status(400).send({
       "Error": err.message
     })
   }
 })
+
+//Verify User
+userRouter.patch('/verify/:verificationCode', async (req, res) => {
+  try {
+    const verificationCode = req.params.verificationCode
+    const user = await User.findOneAndUpdate({verificationCode},{
+      $set:{
+        isVerified:true,
+        verificationCode:null
+      }
+    })
+    res.status(200).send({
+      "Message":"You are Verified"
+    })
+   }
+  catch (err) {
+    res.status(400).send({
+      "Error": err.message
+    })
+  }
+})
+
 
 
 //Log in a User
@@ -37,6 +60,11 @@ userRouter.post("/login", async (req, res) => {
       req.body.username,
       req.body.password
     );
+    if(!user.isVerified){
+      return res.status(401).send({
+        "Error":"You are not verified, please check your email address"
+      })
+    }
 
     const token = await user.generateAuthToken();
 
@@ -50,7 +78,7 @@ userRouter.post("/login", async (req, res) => {
 userRouter.get('/all', verifyAdmin, async (req, res) => {
   try {
     let query = {};
-    const role = req.query.role; 
+    const role = req.query.role;
     switch (true) {
       case !!role:
         query.role = req.query.role
@@ -70,7 +98,7 @@ userRouter.get('/all', verifyAdmin, async (req, res) => {
 //Get Me 
 userRouter.get('/me', auth, async (req, res) => {
   try {
-    
+
     res.status(200).send(req.user);
 
   }
@@ -134,7 +162,7 @@ userRouter.delete('/me', auth, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.user._id);
     res.status(200).send("User was deleted")
-    cancelationEmail(req.user.email,req.user.name)
+    cancelationEmail(req.user.email, req.user.name)
   }
   catch (err) {
     res.status(400).send({
@@ -223,7 +251,7 @@ userRouter.post('/avatar', auth, upload.single('avatar'), async (req, res) => {
 
 
 //Get user avatar
-userRouter.get('/avatar',auth, async (req,res)=>{
+userRouter.get('/avatar', auth, async (req, res) => {
   try {
     if (!req.user.avatar) {
       throw new Error();
@@ -232,7 +260,7 @@ userRouter.get('/avatar',auth, async (req,res)=>{
     res.set("Content-Type", "image/png");
     res.send(req.user.avatar);
   } catch (e) {
-    res.status(400).send({"Error":err.message});
+    res.status(400).send({ "Error": err.message });
   }
 })
 
@@ -240,16 +268,16 @@ userRouter.get('/avatar',auth, async (req,res)=>{
 //Delete user avatar
 
 userRouter.delete("/avatar", auth, async (req, res) => {
-  try{
-  req.user.avatar = undefined;
-  await req.user.save();
-  res.status(200).send({
-    "message":"User's avatar was removed",
-    "user":req.user
-  });
+  try {
+    req.user.avatar = undefined;
+    await req.user.save();
+    res.status(200).send({
+      "message": "User's avatar was removed",
+      "user": req.user
+    });
   }
-  catch(err){
-    res.status(400).send({"Error":err.message})
+  catch (err) {
+    res.status(400).send({ "Error": err.message })
   }
 });
 
