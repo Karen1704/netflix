@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv')
+dotenv.config();
 const userRouter = require('./routes/user');
 const movieRouter = require('./routes/movie');
 const directorRouter = require('./routes/director');
@@ -10,7 +11,6 @@ const countryRouter = require('./routes/country');
 const wishlistRouter = require('./routes/wishlist');
 const reviewRouter = require('./routes/review');
 
-dotenv.config();
 
 
 

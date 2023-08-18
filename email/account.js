@@ -1,3 +1,6 @@
+// const dotenv = require('dotenv')
+// dotenv.config();
+
 const sgMail = require('@sendgrid/mail');
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -8,7 +11,12 @@ const sendWelcomeEmail = (email, name) => {
         to: email,
         subject: "Welcome to our Movies App",
         text: `Welcome ${name}`
-    })
+    }).then(() => {
+        console.log('Email sent')
+      })
+      .catch((error) => {
+        console.error(error)
+      })
 };
 
 const cancelationEmail = (email, name) => {
@@ -19,3 +27,5 @@ const cancelationEmail = (email, name) => {
         text: `GoodBye ${name}, hope will see you soon`,
     })
 }
+
+module.exports = {sendWelcomeEmail,cancelationEmail}

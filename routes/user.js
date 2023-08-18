@@ -4,6 +4,7 @@ const { auth, verifyAdmin, verifyAuthOrAdmin } = require('../middleware/auth');
 const { Error } = require('mongoose');
 const multer = require("multer");
 const sharp = require('sharp');
+const {sendWelcomeEmail,cancelationEmail} = require('../email/account')
 
 
 
@@ -15,13 +16,14 @@ userRouter.post('/register', async (req, res) => {
     ...req.body,
     role: "user"
   })
+
   try {
     await newUser.save();
-
+    sendWelcomeEmail(newUser.email,newUser.name)
     const token = await newUser.generateAuthToken();
     res.status(201).send({ newUser, token })
   } catch (err) {
-    res.status(500).send({
+    res.status(400).send({
       "Error": err.message
     })
   }
@@ -132,6 +134,7 @@ userRouter.delete('/me', auth, async (req, res) => {
   try {
     await User.findByIdAndDelete(req.user._id);
     res.status(200).send("User was deleted")
+    cancelationEmail(req.user.email,req.user.name)
   }
   catch (err) {
     res.status(400).send({
