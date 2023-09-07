@@ -5,9 +5,9 @@ const { Error } = require('mongoose');
 const multer = require("multer");
 const sharp = require('sharp');
 const { sendWelcomeEmail, cancelationEmail, passwordResetEmail, verificationCodeEmail } = require('../email/account')
+const {phoneMessage,verificationSms,verifySmsCode} = require('../twilio/twilio')
 const crypto = require('crypto');
 const { errorMonitor } = require('events');
-const {phoneMessage,verificationSms,verifySmsCode} = require('../twilio/twilio')
 
 //Register a new User
 

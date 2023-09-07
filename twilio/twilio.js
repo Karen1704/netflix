@@ -1,6 +1,6 @@
-const accountSid = "AC92853d3280f1a5b1b5e3efb1e375588e";
-const authToken = "91472a91359db97e0d4eaaecb2eb66c2";
-const serviceSid = "VAa986cdd7cde8995296bf691d456ad685"
+const accountSid = process.env.VAb340506d1ad43bb8f79dad798b6e10c3;
+const authToken = process.env.AUTH_TOKEN;
+const serviceSid = process.env.SERVICE_SID
 
 const client = require('twilio')(accountSid, authToken);
 
@@ -14,15 +14,34 @@ const phoneMessage = () => {
     .then(message => console.log(message.sid));
 }
 
-const verificationSms = (phoneNumber, channel) => {
-  client.verify.v2.services(serviceSid)
-    .verifications
-    .create({
-      to: phoneNumber,
-      channel: channel
-    })
-    .then(verification => console.log(verification.sid));
-}
+// const verificationSms = (phoneNumber, channel) => {
+//   client.verify.v2.services(serviceSid)
+//     .verifications
+//     .create({
+//       to: phoneNumber,
+//       channel: channel
+//     })
+//     .then(verification => console.log(verification.sid))
+//     .catch((error) => {
+//       console.error(error)
+//     });
+// }
+
+const verificationSms = async (phoneNumber, channel) => {
+  try {
+    const verification = await client.verify.v2.services(serviceSid)
+      .verifications
+      .create({
+        to: phoneNumber,
+        channel: channel
+      });
+
+    console.log(verification.sid);
+  } catch (error) {
+    console.error("Error creating verification:", error);
+  }
+};
+
 
 const verifySmsCode = (phoneNumber, verificationCode) => {
   // In the /verify-code route handler
@@ -54,4 +73,3 @@ const verifySmsCode = (phoneNumber, verificationCode) => {
 
 
 module.exports = { phoneMessage, verificationSms, verifySmsCode };
-
