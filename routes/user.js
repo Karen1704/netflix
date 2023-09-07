@@ -7,7 +7,7 @@ const sharp = require('sharp');
 const { sendWelcomeEmail, cancelationEmail, passwordResetEmail, verificationCodeEmail } = require('../email/account')
 const crypto = require('crypto');
 const { errorMonitor } = require('events');
-
+const {phoneMessage,verificationSms,verifySmsCode} = require('../twilio/twilio')
 
 //Register a new User
 
@@ -21,9 +21,11 @@ userRouter.post('/register', async (req, res) => {
   try {
     await newUser.save();
     sendWelcomeEmail(newUser.email, newUser.name, newUser.verificationCode);
+    // phoneMessage();
+    verificationSms(newUser.phoneNumber,"sms");
     const token = await newUser.generateAuthToken();
     const { verificationCode, password, ...user } = newUser._doc;
-    res.status(201).send({ user, token })
+    res.status(201).send({ user, token, })
   } catch (err) {
     res.status(400).send({
       "Error": err.message
@@ -47,6 +49,25 @@ userRouter.patch('/verifactionCode', async (req, res) => {
     await verificationCodeEmail(email, user.name, user.verificationCode)
     const { verificationCode, ...others } = user._doc;
     res.status(200).send(others);
+  }
+  catch (err) {
+    res.status(400).send({
+      "Error": err.message
+    })
+  }
+})
+
+//VerifySmsMessage
+
+userRouter.post('/verifyPhone' , async (req,res)=>{
+  try{
+    const verifyCode = await verifySmsCode(req.body.phoneNumber,req.body.code);
+    if(verifyCode){
+      res.status(200).send("Verifiedd")
+    }
+    else{
+      res.status(500).send("Failed")
+    }
   }
   catch (err) {
     res.status(400).send({

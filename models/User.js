@@ -24,6 +24,11 @@ const userSchema = new mongoose.Schema(
         passwordResetCode:{
           type:String
         },
+        phoneNumber:{
+          type:String,
+          required:true,
+          unique:true
+        },
         email:{
             type:String,
             trim:true,
